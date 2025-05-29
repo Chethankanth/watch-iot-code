@@ -1,87 +1,103 @@
-// #include <Wire.h>
-// #include <U8g2lib.h>
-// #include "MAX30105.h"
-// #include "spo2_algorithm.h"
+#include <Wire.h>
+#include <U8g2lib.h>
+#include "MAX30105.h"
+#include "spo2_algorithm.h"
+#include <MPU6050_light.h>
 
-// // OLED using SH1106 over hardware I2C (no reset pin)
-// U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+// OLED setup
+U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
-// // MAX30105 setup
-// MAX30105 particleSensor;
+// MAX30105 setup
+MAX30105 particleSensor;
 
-// #define BUFFER_SIZE 50
-// uint32_t irBuffer[BUFFER_SIZE];
-// uint32_t redBuffer[BUFFER_SIZE];
+// SpO2 variables
+uint32_t irBuffer[100];   // Infrared LED sensor data
+uint32_t redBuffer[100];  // Red LED sensor data
+int32_t spo2;
+int8_t validSPO2;
+int32_t heartRate;
+int8_t validHeartRate;
 
-// int32_t spo2;
-// int8_t validSPO2;
-// int32_t heartRate;
-// int8_t validHeartRate;
+// MPU6050 setup
+MPU6050 mpu(Wire);
 
-// void setup() {
-//   Serial.begin(115200);
-//   Wire.begin(8, 9); // SDA = GPIO8, SCL = GPIO9
+void setup() {
+  Wire.begin(8, 9); // SDA = GPIO8, SCL = GPIO9 for Indus board
+  Serial.begin(115200);
 
-//   u8g2.begin();
-//   u8g2.clearBuffer();
-//   u8g2.setFont(u8g2_font_ncenB08_tr);
-//   u8g2.drawStr(0, 10, "Initializing...");
-//   u8g2.sendBuffer();
+  // OLED
+  u8g2.begin();
+  u8g2.clearBuffer();
+  u8g2.setFont(u8g2_font_ncenB08_tr);
+  u8g2.drawStr(0, 10, "Smartwatch Booting...");
+  u8g2.sendBuffer();
+  delay(1000);
 
-//   if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {
-//     Serial.println("MAX30105 not found");
-//     u8g2.clearBuffer();
-//     u8g2.drawStr(0, 10, "Sensor not found!");
-//     u8g2.sendBuffer();
-//     while (1);
-//   }
+  // MAX30105 init
+  if (!particleSensor.begin(Wire, I2C_SPEED_STANDARD)) {
+    Serial.println("MAX30105 not found. Check wiring.");
+    while (1);
+  }
+  particleSensor.setup();
+  particleSensor.setPulseAmplitudeRed(0x0A);   // turn Red LED to low
+  particleSensor.setPulseAmplitudeGreen(0);    // turn off Green LED
 
-//   particleSensor.setup(0x1F, 8, 2, 100, 411, 4096);
+  // MPU6050 init
+  mpu.begin();
+  mpu.calcOffsets(true, true); // Calibrate accel + gyro
+  Serial.println("MPU6050 Ready");
+}
 
-//   delay(1000);
-// }
+void loop() {
+  // --- Read MAX30105 values ---
+  for (byte i = 0; i < 100; i++) {
+    while (particleSensor.available() == false) particleSensor.check();
+    redBuffer[i] = particleSensor.getRed();
+    irBuffer[i] = particleSensor.getIR();
+    particleSensor.nextSample();
+  }
 
-// void loop() {
-//   // Fill the buffers
-//   for (int i = 0; i < BUFFER_SIZE; i++) {
-//     while (!particleSensor.available()) {
-//       particleSensor.check();
-//     }
-//     redBuffer[i] = particleSensor.getRed();
-//     irBuffer[i] = particleSensor.getIR();
-//     particleSensor.nextSample();
-//   }
+  // --- Calculate SpO2 and Heart Rate ---
+  maxim_heart_rate_and_oxygen_saturation(irBuffer, 100, redBuffer, &spo2, &validSPO2, &heartRate, &validHeartRate);
 
-//   // Process HR and SpO2
-//   maxim_heart_rate_and_oxygen_saturation(
-//     irBuffer, BUFFER_SIZE, redBuffer,
-//     &spo2, &validSPO2, &heartRate, &validHeartRate
-//   );
+  // --- Read MPU6050 data ---
+  mpu.update();
+  float tempC = mpu.getTemp();
+  float accX = mpu.getAccX();
+  float accY = mpu.getAccY();
+  float accZ = mpu.getAccZ();
+  float gyroX = mpu.getGyroX();
+  float gyroY = mpu.getGyroY();
+  float gyroZ = mpu.getGyroZ();
 
-//   // Print to Serial
-//   Serial.print("HR: ");
-//   Serial.print(heartRate);
-//   Serial.print(" bpm (Valid: ");
-//   Serial.print(validHeartRate);
-//   Serial.println(")");
+  // --- Serial Monitor Output ---
+  Serial.println("=== Sensor Data ===");
+  Serial.print("Heart Rate: "); Serial.print(heartRate); Serial.println(" BPM");
+  Serial.print("SpO2: "); Serial.print(spo2); Serial.println(" %");
+  Serial.print("Temperature: "); Serial.print(tempC); Serial.println(" °C");
 
-//   Serial.print("SpO2: ");
-//   Serial.print(spo2);
-//   Serial.print(" % (Valid: ");
-//   Serial.print(validSPO2);
-//   Serial.println(")");
+  Serial.print("Accelerometer -> X: "); Serial.print(accX);
+  Serial.print(" Y: "); Serial.print(accY);
+  Serial.print(" Z: "); Serial.println(accZ);
 
-//   // Display on OLED
-//   char hrStr[20];
-//   char spo2Str[20];
-//   sprintf(hrStr, "HR: %s bpm", validHeartRate ? String(heartRate).c_str() : "--");
-//   sprintf(spo2Str, "SpO2: %s %%", validSPO2 ? String(spo2).c_str() : "--");
+  Serial.print("Gyroscope -> X: "); Serial.print(gyroX);
+  Serial.print(" Y: "); Serial.print(gyroY);
+  Serial.print(" Z: "); Serial.println(gyroZ);
+  Serial.println("====================");
 
-//   u8g2.clearBuffer();
-//   u8g2.setFont(u8g2_font_ncenB08_tr);
-//   u8g2.drawStr(0, 15, hrStr);
-//   u8g2.drawStr(0, 35, spo2Str);
-//   u8g2.sendBuffer();
+  // --- OLED Display ---
+  u8g2.clearBuffer();
+  u8g2.setFont(u8g2_font_6x12_tr);
+  u8g2.setCursor(0, 12);
+  u8g2.print("HR: "); u8g2.print(heartRate); u8g2.print(" bpm");
 
-//   delay(1000);
-// }
+  u8g2.setCursor(0, 26);
+  u8g2.print("SpO2: "); u8g2.print(spo2); u8g2.print(" %");
+
+  u8g2.setCursor(0, 40);
+  u8g2.print("Temp: "); u8g2.print(tempC, 1); u8g2.print(" C");
+
+  u8g2.sendBuffer();
+
+  delay(1000); // Wait 1 second before next sample
+}
