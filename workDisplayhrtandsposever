@@ -1,0 +1,87 @@
+// #include <Wire.h>
+// #include <U8g2lib.h>
+// #include "MAX30105.h"
+// #include "spo2_algorithm.h"
+
+// // OLED using SH1106 over hardware I2C (no reset pin)
+// U8G2_SH1106_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+
+// // MAX30105 setup
+// MAX30105 particleSensor;
+
+// #define BUFFER_SIZE 50
+// uint32_t irBuffer[BUFFER_SIZE];
+// uint32_t redBuffer[BUFFER_SIZE];
+
+// int32_t spo2;
+// int8_t validSPO2;
+// int32_t heartRate;
+// int8_t validHeartRate;
+
+// void setup() {
+//   Serial.begin(115200);
+//   Wire.begin(8, 9); // SDA = GPIO8, SCL = GPIO9
+
+//   u8g2.begin();
+//   u8g2.clearBuffer();
+//   u8g2.setFont(u8g2_font_ncenB08_tr);
+//   u8g2.drawStr(0, 10, "Initializing...");
+//   u8g2.sendBuffer();
+
+//   if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {
+//     Serial.println("MAX30105 not found");
+//     u8g2.clearBuffer();
+//     u8g2.drawStr(0, 10, "Sensor not found!");
+//     u8g2.sendBuffer();
+//     while (1);
+//   }
+
+//   particleSensor.setup(0x1F, 8, 2, 100, 411, 4096);
+
+//   delay(1000);
+// }
+
+// void loop() {
+//   // Fill the buffers
+//   for (int i = 0; i < BUFFER_SIZE; i++) {
+//     while (!particleSensor.available()) {
+//       particleSensor.check();
+//     }
+//     redBuffer[i] = particleSensor.getRed();
+//     irBuffer[i] = particleSensor.getIR();
+//     particleSensor.nextSample();
+//   }
+
+//   // Process HR and SpO2
+//   maxim_heart_rate_and_oxygen_saturation(
+//     irBuffer, BUFFER_SIZE, redBuffer,
+//     &spo2, &validSPO2, &heartRate, &validHeartRate
+//   );
+
+//   // Print to Serial
+//   Serial.print("HR: ");
+//   Serial.print(heartRate);
+//   Serial.print(" bpm (Valid: ");
+//   Serial.print(validHeartRate);
+//   Serial.println(")");
+
+//   Serial.print("SpO2: ");
+//   Serial.print(spo2);
+//   Serial.print(" % (Valid: ");
+//   Serial.print(validSPO2);
+//   Serial.println(")");
+
+//   // Display on OLED
+//   char hrStr[20];
+//   char spo2Str[20];
+//   sprintf(hrStr, "HR: %s bpm", validHeartRate ? String(heartRate).c_str() : "--");
+//   sprintf(spo2Str, "SpO2: %s %%", validSPO2 ? String(spo2).c_str() : "--");
+
+//   u8g2.clearBuffer();
+//   u8g2.setFont(u8g2_font_ncenB08_tr);
+//   u8g2.drawStr(0, 15, hrStr);
+//   u8g2.drawStr(0, 35, spo2Str);
+//   u8g2.sendBuffer();
+
+//   delay(1000);
+// }
