@@ -57,6 +57,7 @@ ml_mini_project/
 
 3. Configure Firebase
    - Create a Firebase project at https://console.firebase.google.com/
+   - Set up Firestore Database (see FIREBASE_DATABASE_SETUP.md for detailed instructions)
    - Generate a service account key and save as `health_monitor_server/firebase-key.json`
 
 4. Initialize the database

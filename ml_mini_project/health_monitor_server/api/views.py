@@ -6,6 +6,7 @@ from .models import Patient, Guardian, HealthData, Alert
 from .serializers import PatientSerializer, GuardianSerializer, HealthDataSerializer, AlertSerializer
 from .ml_predictor import HealthPredictor
 from .firebase_service import FirebaseService
+from .firebase_repository import FirebaseRepository
 import json
 import requests
 
@@ -123,14 +124,27 @@ def home(request):
     
     return HttpResponse(html)
 
-# Initialize ML predictor and Firebase service
+# Initialize ML predictor, Firebase service, and Firebase repository
 health_predictor = HealthPredictor()
 firebase_service = FirebaseService()
+firebase_repository = FirebaseRepository()
 
 class PatientViewSet(viewsets.ModelViewSet):
     """API endpoint for patients"""
     queryset = Patient.objects.all()
     serializer_class = PatientSerializer
+    
+    def perform_create(self, serializer):
+        """Override create to save patient to Firebase"""
+        patient = serializer.save()
+        firebase_repository.save_patient(patient)
+        return patient
+    
+    def perform_update(self, serializer):
+        """Override update to save patient to Firebase"""
+        patient = serializer.save()
+        firebase_repository.save_patient(patient)
+        return patient
     
     @action(detail=True, methods=['get'])
     def guardians(self, request, pk=None):
@@ -160,11 +174,35 @@ class GuardianViewSet(viewsets.ModelViewSet):
     """API endpoint for guardians"""
     queryset = Guardian.objects.all()
     serializer_class = GuardianSerializer
+    
+    def perform_create(self, serializer):
+        """Override create to save guardian to Firebase"""
+        guardian = serializer.save()
+        firebase_repository.save_guardian(guardian)
+        return guardian
+    
+    def perform_update(self, serializer):
+        """Override update to save guardian to Firebase"""
+        guardian = serializer.save()
+        firebase_repository.save_guardian(guardian)
+        return guardian
 
 class AlertViewSet(viewsets.ModelViewSet):
     """API endpoint for alerts"""
     queryset = Alert.objects.all().order_by('-timestamp')
     serializer_class = AlertSerializer
+    
+    def perform_create(self, serializer):
+        """Override create to save alert to Firebase"""
+        alert = serializer.save()
+        firebase_repository.save_alert(alert)
+        return alert
+    
+    def perform_update(self, serializer):
+        """Override update to save alert to Firebase"""
+        alert = serializer.save()
+        firebase_repository.save_alert(alert)
+        return alert
     
     @action(detail=True, methods=['post'])
     def acknowledge(self, request, pk=None):
@@ -172,6 +210,10 @@ class AlertViewSet(viewsets.ModelViewSet):
         alert = self.get_object()
         alert.status = 'ACKNOWLEDGED'
         alert.save()
+        
+        # Update in Firebase
+        firebase_repository.save_alert(alert)
+        
         serializer = AlertSerializer(alert)
         return Response(serializer.data)
     
@@ -181,6 +223,10 @@ class AlertViewSet(viewsets.ModelViewSet):
         alert = self.get_object()
         alert.status = 'RESOLVED'
         alert.save()
+        
+        # Update in Firebase
+        firebase_repository.save_alert(alert)
+        
         serializer = AlertSerializer(alert)
         return Response(serializer.data)
 
@@ -221,6 +267,9 @@ def process_health_data(request):
             gyroscope_z=data['gyroscope_z']
         )
         
+        # Save health data to Firebase
+        firebase_repository.save_health_data(health_data)
+        
         # Run ML predictions
         # 1. Fall detection
         fall_result = health_predictor.predict_fall(
@@ -247,6 +296,9 @@ def process_health_data(request):
             )
             alerts_created.append(fall_alert)
             
+            # Save alert to Firebase
+            firebase_repository.save_alert(fall_alert)
+            
             # Send notifications to guardians
             guardians = Guardian.objects.filter(patient=patient, notification_enabled=True)
             firebase_service.send_alert_to_guardians(
@@ -267,6 +319,9 @@ def process_health_data(request):
                 status='NEW'
             )
             alerts_created.append(vitals_alert)
+            
+            # Save alert to Firebase
+            firebase_repository.save_alert(vitals_alert)
             
             # Send notifications to guardians
             guardians = Guardian.objects.filter(patient=patient, notification_enabled=True)
