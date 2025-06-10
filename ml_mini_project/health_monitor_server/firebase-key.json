@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "health-tracker-iot",
+  "private_key_id": "c1614517e2abfd135fc47eeeacae0fb40cd05b4b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEuwIBADANBgkqhkiG9w0BAQEFAASCBKUwggShAgEAAoIBAQCskdYkbYJwxPRg\nfwi59s1LgrHN50bQGzRut8C21U8CGitljU+jCMGtk4kZQMXQjqub57L5zHkDg+vf\n0jXcPOivbgC2M09h+mYqwAS+eo+qROcyYa3ku4NiBrgL+ioINKXdXpEtGkm2wRaJ\nbPVxM6eTk+KugDbRjQNfHuhFbHKltQ19aMtMdw8XaJytISbnGB4LSZrZ6fMBXiAB\n68KFTycpF3OoPKW6Dk5bDS75TMkXYNDsEcy/tNR5X70JdZhpx91S/nCdo2lqvfbS\nV9aueROMbZPaFiopKNRN5bA24A2bLBlm7J7bZM/3nWb9u4jbno2ZWPz+lCCsA2q6\n5mX+2dGhAgMBAAECgf8Kpo8qfTFckTG3KVMtWkFRZ7+Rj0418ESykKS6pAk8Sy38\nFoltU1A6ZkcP4YkgvHpBWD6zkoSyTHIPKx1bFADiBhs4Vr8pGbGa8diMT2qOfhiT\nnQ1RqkELMivDXkbTbgYB1tRSJ4BlLYWc9bYwRmZEgkJ7T255Gge01zN+rv+XoOFR\nQyd1GmyzJ2Rt3oWxOwyiGWIVxb8Up6rb+klbd1qyBnZwHVSwNwy3lRBuIjQUlpT5\n0NOsIFAGj9u/ZGBwAsuGDRD4eRwf/NssPmqwD2lEXA0jmRKRa1FdgkU6rFR5zJfM\nCRO8wVuUVRuQZtMIOGYg95v2FHn7lCRwmrrCtI0CgYEA6VqD7DJd9CRLvqxG37dv\ngOsWXAF3Mc8hQy5WPv6+n5ygbG3tBr8KGtMgRZiFsYfp0gkED9taiSbsD8nv+9hC\nOjIC+nUBdxsyPfyYVBTG8BBSb26nfpuoBmnpJ+XGtjzpbz7CEfoeQvaZsKzbJUIU\nsJdl21paLaAH8MxyOntyGocCgYEAvVExe/JIYjEH7nr+tfyS4CRGbHfz3X/85LJy\nvuiLezVNlMlDKkZs5tupKfxbnDGgHKJIBf8Jhm5omAedhWeYjYFzhgK6kSCY/YZb\nOS2DKyUV++9+r1grKOBQNREz7UI+T3v1gFvjy6GUH7BR/pjQpr5yhAP/AjuyKJ5N\nx6ABdJcCgYBRon/KTqh9s4DoGH7G3vZcJGHzF/Qp8atSRFCZwybO0c1xgVdNZ+HS\nFpAQqNYEkGalOtA39+YJWxt0PpH9Cd/JWhueoPY9Q79k3gwwRgB+lUcxgoWIDk5O\nyBhwA7trn42OhGcCQPz7Mif8HcygkSiJyr0wasBne7erbup7ORpm2wKBgAimFu6k\nqO3jc4tPjyddPJCE17rI2Bk8aZ9BD8Ds+sJMMxkjALCDuyHo0xeZ8c127uuf9k5f\n0l2T2a9oWafoja2ZRl/O7BsJNDQQ2UYJcD6eWRzDWjREgORDKybhfE/QgOw8q4CL\nsiJxZUT1VymcbZvQg4bIb/P4KjF02fTOuIJNAoGBAJoCiHO30Jjy2xgEowPIeeH/\nuN4pnByQgfg28HSGSCNMcpLg3PHdLelZEfE1FZuz018OmlhYQVD6uI5bkTThJmO3\nf38HOyk7zI0OjFQe7UKsTW0VyppFNFahIIGN+C2g9QurSfEz8Z5eB/+31uJb8DCi\nh13tsXAWUpYxJ8A7d3Hq\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@health-tracker-iot.iam.gserviceaccount.com",
+  "client_id": "115107873496096976758",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40health-tracker-iot.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
